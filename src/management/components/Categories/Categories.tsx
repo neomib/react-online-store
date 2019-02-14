@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { Category, dataService } from '../../../core/services/data.service';
-import { Toolbar, List, IconButton, Button, Typography, AppBar, withStyles } from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/Close';
+import { Toolbar, List, IconButton, Button, Typography, AppBar, withStyles, Card, CardContent } from '@material-ui/core';
+import { withRouter, match } from 'react-router-dom';
+import { History, Location } from 'history';
 
 const styles = {
   appBar: {
@@ -11,13 +12,25 @@ const styles = {
     flex: 1,
   },
 };
-class Categories extends React.Component<{ categoryId: string }, any>  {
+class Categories extends React.Component<{ history: History, location: Location, match: match<any> }, any>  {
 
-  category: Category = { name: '', subCategories: [] };
+  categories: string[] = [];
+  parentCategoryName: string = '';
+  parentCategoryId: number = -1;
   componentWillMount()
   {
-    const { categoryId } = this.props;
-    this.category = dataService.getCategory(categoryId);
+    const params = this.props.match.params;
+    if (params.categoryId)
+    {
+      const parentCategory = dataService.getCategory(params.categoryId);
+      this.parentCategoryName = parentCategory ? parentCategory.name : '';
+      this.categories = parentCategory ? parentCategory.subCategories : [];
+      this.parentCategoryId = params.categoryId;
+    }
+    else
+    {
+      this.categories = dataService.firstLevelCategories;
+    }
   }
   handleClose()
   {
@@ -25,25 +38,44 @@ class Categories extends React.Component<{ categoryId: string }, any>  {
   }
   public render()
   {
-    const { name: categoryName } = this.category;
     return (
       <div >
-        <AppBar style={{ position: 'relative' }}>
-          <Toolbar>
-            <IconButton color="inherit" onClick={this.handleClose} aria-label="Close">
-              <CloseIcon />
-            </IconButton>
-            <Typography variant="h6" color="inherit" style={{ flex: 1 }}>
-              {categoryName}
+        <AppBar style={{ position: 'relative' }} color='default'>
+          <Toolbar >
+            <Typography variant="h6" color="textSecondary" style={{ flex: 1 }}>
+              קטגוריות
             </Typography>
           </Toolbar>
         </AppBar>
-        <List>
-
-        </List>
+        {this.parentCategoryName != '' && <Toolbar>
+          <Typography variant="h4" color="inherit" style={{ flex: 1 }}>
+            {this.parentCategoryName}
+          </Typography>
+        </Toolbar>}
+        {this.renderCategories()}
+      </div>
+    );
+  }
+  renderCategories = () =>
+  {
+    return (
+      <div>
+        {
+          this.categories.map(categoryNum =>
+          {
+            let category = dataService.getCategory(categoryNum);
+            return (<Card key={categoryNum}>
+              <CardContent>
+                <Typography variant="h5" component="h2" color="textSecondary">
+                  {category.name}
+                </Typography>
+              </CardContent>
+            </Card>)
+          })
+        }
       </div>
     );
   }
 }
 
-export default Categories;
+export default withRouter(Categories);

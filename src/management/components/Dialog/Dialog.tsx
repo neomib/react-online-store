@@ -5,7 +5,8 @@ export interface Action
 {
   title: string;
   click(): void;
-  color?: PropTypes.Color
+  color?: PropTypes.Color;
+  isDisabled?:boolean
 }
 
 export interface DialogProps
@@ -85,7 +86,7 @@ export const DialogActionButtons = ({ actions }: { actions: Action[] }) =>
     {
       actions.map((action,index) =>
       {
-        return (<Button key={index} onClick={action.click} color={action.color || "primary"}>
+        return (<Button key={index} disabled={action.isDisabled} onClick={action.click} color={action.color || "primary"}>
           {action.title}
         </Button>)
       })

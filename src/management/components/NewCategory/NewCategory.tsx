@@ -1,17 +1,19 @@
 import * as React from 'react';
-import { TextField } from '@material-ui/core';
+import { TextField, CircularProgress } from '@material-ui/core';
 import { dataService } from '../../../core/services/data.service';
 import { DialogTitle, DialogContent, DialogContentText, DialogActionButtons, Action } from '../Dialog';
 import { DialogHandler } from '../../handlers/handler';
 import Categories from '../Categories';
+import { withRouter, Route, match } from 'react-router';
+import { History, Location } from 'history';
 
-class NewCategory extends React.Component<any, any>  {
+class NewCategory extends React.Component<{ parentId?: string, history: History, location: Location, match: match }, any>  {
   actions: Action[];
 
   constructor(props: any)
   {
     super(props);
-    this.state = { value: '' };
+    this.state = { value: '', loading: false };
     this.actions = [
       { title: 'ביטול', click: DialogHandler.close },
       { title: 'הוסף', click: this.addCategory }
@@ -24,17 +26,27 @@ class NewCategory extends React.Component<any, any>  {
   }
   addCategory = () =>
   {
-    DialogHandler.close();
     if (this.state.value != '')
     {
+      this.actions.map(action => action.isDisabled = true);
+      this.setState({ loading: true });
       dataService.addCategory(this.state.value)
-        .then(categoryId => DialogHandler.open(Categories, { categoryId }))
+        .then(categoryId => 
+        {
+          DialogHandler.close();
+          this.props.history.push('/קטגוריות/'+categoryId);
+        })
+        .finally(() =>
+        {
+          this.actions.map(action => action.isDisabled = false);
+          this.setState({ loading: false });
+        })
     }
   }
   public render()
   {
     return (
-      <div >
+      <div className='NewCategory'>
         <DialogTitle>הוסף קטגוריה</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -50,10 +62,13 @@ class NewCategory extends React.Component<any, any>  {
             onChange={this.onValueChange}
           />
         </DialogContent>
-        <DialogActionButtons actions={this.actions} />
+        <div>
+          {this.state.loading && <CircularProgress size={24} className='Progress' />}
+          <DialogActionButtons actions={this.actions} />
+        </div>
       </div>
     );
   }
 }
 
-export default NewCategory;
+export default withRouter(NewCategory);

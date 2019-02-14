@@ -8,7 +8,7 @@ export class Handlers extends React.Component<any,any>
     render()
     {
         return [
-            <Dialog onRef={(ref: DialogType) => DialogHandler = ref} />
+            <Dialog key="dialog" onRef={(ref: DialogType) => DialogHandler = ref} />
         ]
     }
 }
