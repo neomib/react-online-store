@@ -6,9 +6,12 @@ import { DialogHandler } from '../../handlers/handler';
 import Categories from '../Categories';
 import { withRouter, Route, match } from 'react-router';
 import { History, Location } from 'history';
+import { CirclePicker , Color, ColorResult } from 'react-color';
+
 
 class NewCategory extends React.Component<{ parentId?: string, history: History, location: Location, match: match }, any>  {
   actions: Action[];
+  color: string = '#000';
 
   constructor(props: any)
   {
@@ -30,11 +33,11 @@ class NewCategory extends React.Component<{ parentId?: string, history: History,
     {
       this.actions.map(action => action.isDisabled = true);
       this.setState({ loading: true });
-      dataService.addCategory(this.state.value)
+      dataService.addCategory({name:this.state.value,color:this.color})
         .then(categoryId => 
         {
           DialogHandler.close();
-          this.props.history.push('/קטגוריות/'+categoryId);
+          this.props.history.push('/קטגוריות/' + categoryId);
         })
         .finally(() =>
         {
@@ -42,6 +45,10 @@ class NewCategory extends React.Component<{ parentId?: string, history: History,
           this.setState({ loading: false });
         })
     }
+  }
+  colorPicked = (color: ColorResult) =>
+  {
+    this.color = color.hex;
   }
   public render()
   {
@@ -61,6 +68,7 @@ class NewCategory extends React.Component<{ parentId?: string, history: History,
             value={this.state.value}
             onChange={this.onValueChange}
           />
+          <CirclePicker onChangeComplete={this.colorPicked} />
         </DialogContent>
         <div>
           {this.state.loading && <CircularProgress size={24} className='Progress' />}

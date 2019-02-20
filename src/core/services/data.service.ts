@@ -1,4 +1,5 @@
 import { firebaseService } from "./firebase.service";
+import { computed, observable, action } from 'mobx';
 
 const ProductsCol = 'products';
 const CategoriesDoc = 'categoriesDoc';
@@ -7,13 +8,14 @@ export interface Category
 {
     name: string,
     subCategories: string[],
-    level: number
+    level: number,
+    color?:string
 }
 
 class DataService
 {
-    private categories: { [key: string]: Category } = {};
-    private firstLevelCategoryList: string[] = [];
+    @observable private categories: { [key: string]: Category } = {};
+    @observable private firstLevelCategoryList: string[] = [];
     private categoriesNum = 0;
 
     getCategory(categoryId: string)
@@ -26,22 +28,25 @@ class DataService
     }
     retrieveCategories()
     {
-        firebaseService.subscribeToDocData(ProductsCol, CategoriesDoc,
-            (categories) =>
-            {
-                if (categories)
+        if (Object.keys(this.categories).length <= 0)
+        {
+            firebaseService.subscribeToDocData(ProductsCol, CategoriesDoc,
+                (categories) =>
                 {
-                    this.categoriesNum = Object.keys(categories).length;
-                    this.categories = categories;
-                    this.setParentCategories();
-                }
-            });
+                    if (categories)
+                    {
+                        this.categoriesNum = Object.keys(categories).length;
+                        this.categories = categories;
+                        this.setParentCategories();
+                    }
+                });
+        }
     }
-    addCategory(categoryName: string, parentId?: string)
+    addCategory(category: {name:string,color?:string}, parentId?: string)
     {
         let categoryId = parentId ? parentId + this.categoriesNum : this.categoriesNum + '';
         let categories: { [key: string]: any } = {};
-        categories[categoryId] = { name: categoryName, subCategories: [], level: 1 };
+        categories[categoryId] = { name: category.name, subCategories: [], level: 1,color:category.color };
 
         if (parentId)
         {
