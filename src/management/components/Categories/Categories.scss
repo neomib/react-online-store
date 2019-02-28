@@ -1,5 +1,6 @@
 .categories
 {
+    height: 90vh;
     .categoryCard
     {
         margin:2vw
@@ -12,5 +13,14 @@
        background-color: #ff5959;
        color: white;
    
+    }
+    .loading
+    {
+        height:100%;
+        justify-content: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: -7vh;
     }
 }

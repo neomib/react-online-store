@@ -53,7 +53,7 @@ class DataService
             let parentCategory = this.categories[parentId];
             categories[categoryId].level = parentCategory.level + 1;
             parentCategory.subCategories.push(categoryId);
-            categories[parentId + '.subCategories'] = parentCategory.subCategories;
+            categories[parentId] = parentCategory;
         }
 
         return firebaseService.setDoc(ProductsCol, CategoriesDoc, categories)

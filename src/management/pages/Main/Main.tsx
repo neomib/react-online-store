@@ -6,6 +6,7 @@ import { dataService } from '../../../core/services/data.service';
 import { withRouter, match, Route, Switch } from 'react-router-dom';
 import { History, Location } from 'history';
 import Categories from '../../components/Categories';
+import { CategoriesUrl } from '../../routes';
 
 class Main extends React.Component<{ history: History, location: Location, match: match }, any>  {
   componentWillMount()
@@ -22,7 +23,7 @@ class Main extends React.Component<{ history: History, location: Location, match
   }
   goToCategories = () =>
   {
-    this.props.history.push('/קטגוריות');
+    this.props.history.push(CategoriesUrl);
   }
   public render()
   {

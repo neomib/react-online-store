@@ -7,6 +7,7 @@ import Categories from '../Categories';
 import { withRouter, Route, match } from 'react-router';
 import { History, Location } from 'history';
 import { CirclePicker , Color, ColorResult } from 'react-color';
+import { CategoriesUrl } from '../../routes';
 
 
 class NewCategory extends React.Component<{ parentId?: string, history: History, location: Location, match: match }, any>  {
@@ -33,11 +34,11 @@ class NewCategory extends React.Component<{ parentId?: string, history: History,
     {
       this.actions.map(action => action.isDisabled = true);
       this.setState({ loading: true });
-      dataService.addCategory({name:this.state.value,color:this.color})
+      dataService.addCategory({name:this.state.value,color:this.color},this.props.parentId)
         .then(categoryId => 
         {
           DialogHandler.close();
-          this.props.history.push('/קטגוריות/' + categoryId);
+          this.props.history.push(CategoriesUrl +'/'+ categoryId);
         })
         .finally(() =>
         {
@@ -52,9 +53,10 @@ class NewCategory extends React.Component<{ parentId?: string, history: History,
   }
   public render()
   {
+    let parentCategoryName=this.props.parentId? dataService.getCategory(this.props.parentId).name : 'הוסף קטגוריה'; 
     return (
       <div className='NewCategory'>
-        <DialogTitle>הוסף קטגוריה</DialogTitle>
+        <DialogTitle>{parentCategoryName}</DialogTitle>
         <DialogContent>
           <DialogContentText>
             הכנס את שם הקטגוריה שברצונך להוסיף
