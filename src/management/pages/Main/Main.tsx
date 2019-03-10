@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Grid, Typography, List, ListItem, Button } from '@material-ui/core';
 import NewCategory from '../../components/NewCategory';
 import { DialogHandler } from '../../handlers/handler';
-import { dataService } from '../../../core/services/data.service';
+import { dataService } from '../../core/services/data.service';
 import { withRouter, match, Route, Switch } from 'react-router-dom';
 import { History, Location } from 'history';
 import Categories from '../../components/Categories';
@@ -30,8 +30,8 @@ class Main extends React.Component<{ history: History, location: Location, match
     return (
       <div>
         <div id='Main'>
-          <Grid container spacing={16} justify="center" alignItems="center" >
-            <Grid item xs={12} md={8}>
+          <Grid container justify="center" alignItems="center" >
+            <Grid item xs={12} md={8} className="grid-row">
               <div>
                 <Button variant='contained'
                   className='orangeBtn largeBtn'
@@ -42,7 +42,7 @@ class Main extends React.Component<{ history: History, location: Location, match
               </div>
             </Grid>
             {/* secon grid  */}
-            <Grid item xs={12} md={8}>
+            <Grid item xs={12} md={8} className="grid-row">
               <div>
                 <Button variant='contained'
                   className='greenBtn largeBtn'

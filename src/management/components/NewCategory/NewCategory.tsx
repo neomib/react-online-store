@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { TextField, CircularProgress } from '@material-ui/core';
-import { dataService } from '../../../core/services/data.service';
+import { dataService } from '../../core/services/data.service';
 import { DialogTitle, DialogContent, DialogContentText, DialogActionButtons, Action } from '../Dialog';
 import { DialogHandler } from '../../handlers/handler';
 import Categories from '../Categories';
@@ -38,7 +38,7 @@ class NewCategory extends React.Component<{ parentId?: string, history: History,
         .then(categoryId => 
         {
           DialogHandler.close();
-          this.props.history.push(CategoriesUrl +'/'+ categoryId);
+          // this.props.history.push(CategoriesUrl +'/'+ categoryId);
         })
         .finally(() =>
         {
@@ -70,7 +70,9 @@ class NewCategory extends React.Component<{ parentId?: string, history: History,
             value={this.state.value}
             onChange={this.onValueChange}
           />
-          <CirclePicker onChangeComplete={this.colorPicked} />
+          <div className="color-picker-container">
+          <CirclePicker onChangeComplete={this.colorPicked} color={this.color} />
+          </div>
         </DialogContent>
         <div>
           {this.state.loading && <CircularProgress size={24} className='Progress' />}

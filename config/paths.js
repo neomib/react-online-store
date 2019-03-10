@@ -10,6 +10,8 @@ const appDirectory = fs.realpathSync(process.cwd());
 const resolveApp = relativePath => path.resolve(appDirectory, relativePath);
 
 const envPublicUrl = process.env.PUBLIC_URL;
+const subPath="management/";
+const subPathWithSlash="/management";
 
 function ensureSlash(inputPath, needsSlash) {
   const hasSlash = inputPath.endsWith('/');
@@ -69,10 +71,10 @@ const resolveModule = (resolveFn, filePath) => {
 module.exports = {
   dotenv: resolveApp('.env'),
   appPath: resolveApp('.'),
-  appBuild: resolveApp('build'),
+  appBuild: resolveApp('build'+subPathWithSlash),
   appPublic: resolveApp('public'),
   appHtml: resolveApp('public/index.html'),
-  appIndexJs: resolveModule(resolveApp, 'src/management/index'),
+  appIndexJs: resolveModule(resolveApp, 'src/'+envPublicUrl+'/index'),
   appPackageJson: resolveApp('package.json'),
   appSrc: resolveApp('src'),
   appTsConfig: resolveApp('tsconfig.json'),

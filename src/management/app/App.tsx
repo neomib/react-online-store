@@ -11,9 +11,9 @@ class App extends Component
   render()
   {
     return (
-      <Router>
+      <Router basename="/management" >
         <div className="App">
-          <header className="Header">
+       <header className="Header">
             <p> ניהול החנות שלי</p>
           </header>
           <Handlers />
@@ -23,6 +23,7 @@ class App extends Component
             <Route path="/קטגוריות" component={Categories} />
           </Switch>
         </div>
+       
       </Router>
     );
   }

@@ -1,6 +1,18 @@
 import * as React from 'react';
-import { Category, dataService } from '../../../core/services/data.service';
-import { Toolbar,Fab, Typography, AppBar, Card, CardContent, Grid, CircularProgress } from '@material-ui/core';
+import { Category, dataService, MaxCategoryLevel } from '../../core/services/data.service';
+import
+{
+  Slide,
+  Toolbar,
+  Fab,
+  Typography,
+  AppBar,
+  Card,
+  CardContent,
+  CardActionArea,
+  Grid,
+  CircularProgress
+} from '@material-ui/core';
 import { withRouter, match } from 'react-router-dom';
 import { History, Location } from 'history';
 import { observer } from 'mobx-react';
@@ -8,7 +20,8 @@ import AddIcon from '@material-ui/icons/Add';
 import { DialogHandler } from '../../handlers/handler';
 import NewCategory from '../NewCategory';
 import { CategoriesUrl } from '../../routes';
-import { computed } from 'mobx';
+import { computed, observable } from 'mobx';
+import chunk from 'lodash.chunk';
 
 interface WithRouterProps
 {
@@ -27,105 +40,132 @@ const styles = {
 @observer
 class Categories extends React.Component<WithRouterProps, any>  {
 
-  // parentCategory: Category = { name: '', level: -1, subCategories: [] };
-  parentCategoryId = -1;
-  categoriesLength=-1;
+  // category: Category = { name: '', level: -1, subCategories: [] };
+  categoryId = -1;
+  categoriesLength = -1;
+  isLoading: boolean | null = null;
 
   constructor(props: WithRouterProps)
   {
     super(props);
-   
+
     dataService.retrieveCategories();
   }
   @computed get categories()
   {
     const params = this.props.match.params;
-    let categories:string[]=[];
+    let categories: string[] = [];
     if (params.categoryId)
     {
-      const parentCategory = dataService.getCategory(params.categoryId);
-      if(parentCategory)
+      const category = dataService.getCategory(params.categoryId);
+      if (category)
       {
-      categories=parentCategory ? parentCategory.subCategories : [];
-      this.categoriesLength=categories.length;
+        categories = category ? category.subCategories : [];
+        this.categoriesLength = categories.length;
       }
     }
     else
     {
-      categories= dataService.firstLevelCategories;
-      this.categoriesLength=categories.length;
+      categories = dataService.firstLevelCategories;
+      this.categoriesLength = categories.length;
     }
-    
-    return categories;
+    if (this.isLoading == null && this.categoriesLength <= 0)
+    {
+      this.isLoading = true;
+    }
+    else
+    {
+      this.isLoading = false;
+    }
+
+    return chunk(categories, 2);
   }
-  
-  @computed get parentCategory()
+
+  @computed get category()
   {
-    let category={ name: '', level: -1, subCategories: [''] };
+    let category = { name: '', level: -1, subCategories: [''] };
     const params = this.props.match.params;
     if (params.categoryId)
     {
       category = dataService.getCategory(params.categoryId);
     }
-    if(!category)
-        category={ name: '', level: -1, subCategories: [''] };
+    if (!category)
+      category = { name: '', level: -1, subCategories: [''] };
     else
-        this.categoriesLength=category.subCategories.length;
-      
+      this.categoriesLength = category.subCategories.length;
+
     return category;
   }
 
-  private addNewCategory(parentCategoryId:string)
+  private addNewCategory(categoryId: string)
   {
-    DialogHandler.open(NewCategory,{parentId:parentCategoryId});
+    DialogHandler.open(NewCategory, { parentId: categoryId });
   }
-  private goToSubCategory(categoryNum:string)
+  private goToSubCategory(categoryNum: string)
   {
-    this.props.history.push(CategoriesUrl+'/'+categoryNum);
+    const category = dataService.getCategory(categoryNum);
+    if (category.level < MaxCategoryLevel)
+      this.props.history.push(CategoriesUrl + '/' + categoryNum);
+
+
   }
   public render()
   {
-    const parentCategory=this.parentCategory;
-    const parentCategoryLevel=parentCategory.level;
-    const parentCategoryName = parentCategory.name;
-    const categories=this.categories;
-     const params = this.props.match.params;
+    const category = this.category;
+    const categoryLevel = category.level;
+    const categoryName = category.name;
+    const categories = this.categories;
+    const params = this.props.match.params;
     return (
-      <div className='categories'>
-        <AppBar style={{ position: 'relative' }} color='default'>
-          <Toolbar >
-            <Typography variant="h6" color="textSecondary" style={{ flex: 1 }}>
-              {parentCategoryLevel != -1 ? parentCategoryName: 'קטגוריות'}
-            </Typography>
-          </Toolbar>
-        </AppBar>
-        {this.categoriesLength>0 && this.renderCategories(categories)}
-         {(this.categoriesLength<0 && params.categoryId || this.categoriesLength ==0 && !params.categoryId)&& <div className='loading'><CircularProgress /></div>}
-         {(this.categoriesLength==0  && params.categoryId) && <div>לא הגדרת תתי קטגוריות עדיין.
-         <div> לחץ על ה+ להוספה</div></div>}
-         <Fab  className='fab' onClick={()=>this.addNewCategory(params.categoryId)}><AddIcon/></Fab>
-      </div>
+        <div className='categories'>
+          <AppBar style={{ position: 'relative' }} color='default'>
+            {!this.isLoading && <Toolbar >
+              <Typography variant="h6" color="textSecondary" style={{ flex: 1 }}>
+                {categoryLevel != -1 ? categoryName : 'קטגוריות'}
+              </Typography>
+            </Toolbar>}
+          </AppBar>
+          {this.categoriesLength > 0 && this.renderCategories(categories)}
+          {this.isLoading && <div className='middle'><CircularProgress /></div>}
+          {(!this.isLoading && this.categoriesLength == 0 && params.categoryId) && <div className='middle'>לא הגדרת תתי קטגוריות עדיין.<div> לחץ על ה+ להוספה!</div></div>}
+          {(!this.isLoading && this.categoriesLength == 0 && !params.categoryId) && <div className='middle'>לא הגדרת קטגוריות עדיין.<div> לחץ על ה+ להוספה!</div></div>}
+          <Fab className='fab' onClick={() => this.addNewCategory(params.categoryId)}><AddIcon /></Fab>
+        </div>
     );
   }
-  renderCategories = (categories:string[]) =>
+  renderCategories = (categories: string[][]) =>
   {
     return (
-      <Grid container spacing={16} justify="center" alignItems="center" >
-        <Grid item xs={12} md={8}>
+      <Grid container justify="center" alignItems="center" >
+        {
+          categories.map((categoryPair, index) =>
           {
-            categories.map(categoryNum =>
-            {
-              let category = dataService.getCategory(categoryNum);
-              return (<Card key={categoryNum} className="categoryCard" onClick={()=>this.goToSubCategory(categoryNum)}>
-                <CardContent>
-                  <Typography variant="h5" component="h2" style={{ color: category.color }}>
-                    {category.name}
-                  </Typography>
-                </CardContent>
-              </Card>)
-            })
-          }
-        </Grid>
+            return (
+              <Grid item xs={12} md={8} key={'pair' + index}>
+                <Grid direction="row" container >
+                  {
+                    categoryPair.map((categoryNum, index, arr) =>
+                    {
+                      let category = dataService.getCategory(categoryNum);
+                      return (<Grid item xs={12} md={arr.length == 2 ? 6 : 12} key={'item' + index + categoryNum}>
+                        <Card className="categoryCard" onClick={() => this.goToSubCategory(categoryNum)}>
+                          <CardActionArea className="categoryButton">
+                            <CardContent>
+                              {category && <Typography variant="h5" component="h2" style={{ color: category.color }}>
+                                {category.name}
+                              </Typography>}
+                            </CardContent>
+                          </CardActionArea>
+                        </Card>
+                      </Grid>
+                      )
+                    })
+                  }
+                </Grid>
+              </Grid>);
+          })
+        }
+
       </Grid>
     );
   }

@@ -3,6 +3,7 @@ import { computed, observable, action } from 'mobx';
 
 const ProductsCol = 'products';
 const CategoriesDoc = 'categoriesDoc';
+export const MaxCategoryLevel=2;
 
 export interface Category
 {
@@ -39,24 +40,27 @@ class DataService
                         this.categories = categories;
                         this.setParentCategories();
                     }
+                    else{
+                        firebaseService.setDoc(ProductsCol,CategoriesDoc,{});
+                    }
                 });
         }
     }
     addCategory(category: {name:string,color?:string}, parentId?: string)
     {
         let categoryId = parentId ? parentId + this.categoriesNum : this.categoriesNum + '';
-        let categories: { [key: string]: any } = {};
-        categories[categoryId] = { name: category.name, subCategories: [], level: 1,color:category.color };
-
+        this.categories[categoryId] = { name: category.name, subCategories: [], level: 1,color:category.color };
+        let updateObj: { [key: string]: Category }={};
+        updateObj[categoryId]=this.categories[categoryId];
         if (parentId)
         {
             let parentCategory = this.categories[parentId];
-            categories[categoryId].level = parentCategory.level + 1;
+            this.categories[categoryId].level = parentCategory.level + 1;
             parentCategory.subCategories.push(categoryId);
-            categories[parentId] = parentCategory;
+           updateObj[parentId]=parentCategory;
         }
 
-        return firebaseService.setDoc(ProductsCol, CategoriesDoc, categories)
+        return firebaseService.setDoc(ProductsCol, CategoriesDoc, updateObj)
             .then(response => Promise.resolve(categoryId))
             .catch(() => { });
     }
