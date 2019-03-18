@@ -23,13 +23,23 @@ class FirebaseService
   }
   public setDoc(collectionPath: string, docPath: string, data: firestore.DocumentData)
   {
-    return this.database.collection(collectionPath).doc(docPath).set(data,{ merge: true });
+    return this.database.collection(collectionPath).doc(docPath).set(data, { merge: true });
   }
   public updateDoc(collectionPath: string, docPath: string, data: firestore.DocumentData)
   {
     return this.database.collection(collectionPath).doc(docPath).update(data);
   }
-  
+  public deleteField(collectionPath: string, docPath: string, fieldName: string)
+  {
+    let doc = this.database.collection(collectionPath).doc(docPath);
+    if (doc)
+    {
+      const objToUpdate:{[key:string]:firestore.FieldValue}={};
+      objToUpdate[fieldName]=firebase.firestore.FieldValue.delete();
+      doc.update(objToUpdate);
+    }
+  }
+
   subscribeToDocData(collectionPath: string, docPath: string, callback: (result: firestore.DocumentData | undefined) => void)
   {
     let doc = this.database.collection(collectionPath).doc(docPath);
