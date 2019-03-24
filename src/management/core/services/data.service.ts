@@ -1,17 +1,7 @@
 import { firebaseService } from "./firebase.service";
 import { computed, observable, action } from 'mobx';
-
-const ProductsCol = 'products';
-const CategoriesDoc = 'categoriesDoc';
-export const MaxCategoryLevel = 2;
-
-export interface Category
-{
-    name: string,
-    subCategories: string[],
-    level: number,
-    color?: string
-}
+import { ProductsCol, CategoriesDoc } from "../constants";
+import { Category, Items } from "../entities";
 
 class DataService
 {
@@ -90,6 +80,11 @@ class DataService
     setParentCategories()
     {
         this.firstLevelCategoryList = Object.keys(this.categories).filter(categoryNum => this.categories[categoryNum].level === 1);
+    }
+
+    retrieveItems(categoryId:string,callback:(items:Items)=>void)
+    {
+        firebaseService.getDocumentByQuery();
     }
 }
 export let dataService = new DataService();

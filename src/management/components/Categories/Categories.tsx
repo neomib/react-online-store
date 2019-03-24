@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Category, dataService, MaxCategoryLevel } from '../../core/services/data.service';
+import {  dataService } from '../../core/services/data.service';
 import
 {
   Slide,
@@ -26,6 +26,7 @@ import NewCategory from '../NewCategory';
 import { CategoriesUrl } from '../../routes';
 import { computed, observable } from 'mobx';
 import chunk from 'lodash.chunk';
+import { MaxCategoryLevel } from '../../core/constants';
 
 interface WithRouterProps
 {
